@@ -2,7 +2,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Bounce2.h>
 
-const int DEBUGGING = false;
+const int DEBUGGING = true;
 const int MOTION_DETECTOR_PIN = 2;   // HC-SR502 Output connected to Digital Pin 2
 const int BUTTON_PIN = 3;
 const int BUTTON_LED_PIN = 4;
@@ -20,8 +20,8 @@ const int SERVO_MOTION_QUIET = 10000;
 Adafruit_PWMServoDriver servos = Adafruit_PWMServoDriver();
 Bounce2::Button button = Bounce2::Button();
 
-int cat_machine_active = false;
-bool turned_on = false;
+int catMachineActive = false;
+int stayQuietUntil = 0;
 
 void setup() {
   pinMode(MOTION_DETECTOR_PIN, INPUT);
@@ -54,8 +54,16 @@ void setup() {
 void loop() {
   checkButtonState();
 
-  if(cat_machine_active) {
-    checkForMotion();
+  if(catMachineActive) {
+    if((stayQuietUntil != 0) && (stayQuietUntil > millis())) {
+      printStatus("Cat Machine Is Quiet " + String(millis()) + " " + String(stayQuietUntil));
+    } else {
+      stayQuietUntil = 0;
+
+      checkForMotion();
+    }
+
+    delay(100);
   }
 }
 
@@ -84,9 +92,9 @@ void checkForMotion() {
 void checkButtonState() {
   button.update();
   
-  if (button.fell()) cat_machine_active = !cat_machine_active;
+  if (button.fell()) catMachineActive = !catMachineActive;
 
-  if(cat_machine_active) {
+  if(catMachineActive) {
     digitalWrite(BUTTON_LED_PIN, LOW);
   } else {
     digitalWrite(BUTTON_LED_PIN, HIGH);
@@ -105,9 +113,10 @@ void servoNoise() {
 
   servoPosition(SERVO_IDLE_ANGLE);
 
-  printStatus("Motion Disabled");
-  delay(SERVO_MOTION_QUIET);
-  printStatus("Motion Enabled");
+  stayQuietUntil = millis() + SERVO_MOTION_QUIET;
+  //DEBUGprintStatus("Motion Disabled");
+  //delay(SERVO_MOTION_QUIET);
+  //printStatus("Motion Enabled");
 }
 
 void servoPosition(int angle) {
