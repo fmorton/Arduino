@@ -1,8 +1,11 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <Bounce2.h>
 
-const int DEBUGGING = true;
-const int PIR_PIN = 2;   // HC-SR502 Output connected to Digital Pin 2
+const int DEBUGGING = false;
+const int MOTION_DETECTOR_PIN = 2;   // HC-SR502 Output connected to Digital Pin 2
+const int BUTTON_PIN = 3;
+const int BUTTON_LED_PIN = 4;
 const int LED_PIN = 13;  // Built-in Arduino LED
 const int SERVOMIN = 150;  // Minimum pulse length count (out of 4096) for 0 degrees
 const int SERVOMAX = 600;  // Maximum pulse length count (out of 4096) for 180 degrees
@@ -15,25 +18,31 @@ const int SERVO_IDLE_ANGLE = 90;
 const int SERVO_MOTION_QUIET = 10000;
 
 Adafruit_PWMServoDriver servos = Adafruit_PWMServoDriver();
+Bounce2::Button button = Bounce2::Button();
+
+int cat_machine_active = false;
+bool turned_on = false;
 
 void setup() {
-  pinMode(PIR_PIN, INPUT);
+  pinMode(MOTION_DETECTOR_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_LED_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
-  
+
+  button.attach(BUTTON_PIN, INPUT_PULLUP);
+  button.interval(50);
+  button.setPressedState(LOW);
+
   Serial.begin(115200);
   delay(1000);
 
   digitalWrite(LED_PIN, HIGH);
 
   servos.begin();
-  servos.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  servos.setPWMFreq(60);
   delay(10);
 
   servoPosition(SERVO_IDLE_ANGLE);
-
-  if(DEBUGGING) {
-    servoNoise();
-  }
 
   printStatus("Initializing sensor");
   delay(30000); 
@@ -43,7 +52,15 @@ void setup() {
 }
 
 void loop() {
-  int motionDetected = digitalRead(PIR_PIN);
+  checkButtonState();
+
+  if(cat_machine_active) {
+    checkForMotion();
+  }
+}
+
+void checkForMotion() {
+  int motionDetected = digitalRead(MOTION_DETECTOR_PIN);
 
   if (motionDetected == HIGH) {
     digitalWrite(LED_PIN, HIGH);
@@ -62,6 +79,18 @@ void loop() {
   }
   
   delay(100);
+}
+
+void checkButtonState() {
+  button.update();
+  
+  if (button.fell()) cat_machine_active = !cat_machine_active;
+
+  if(cat_machine_active) {
+    digitalWrite(BUTTON_LED_PIN, LOW);
+  } else {
+    digitalWrite(BUTTON_LED_PIN, HIGH);
+  }
 }
 
 void servoNoise() {
@@ -94,7 +123,7 @@ void setServoAngle(uint8_t channel, int angle) {
 }
 
 void clearMotionDetector() {
-  while (digitalRead(PIR_PIN) == HIGH) {
+  while (digitalRead(MOTION_DETECTOR_PIN) == HIGH) {
     printStatus("Waiting");
 
     delay(1000);
