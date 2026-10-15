@@ -9,10 +9,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  600  // Maximum pulse length count (out of 4096) for 180 degrees
 
 // Specify the port your servo is plugged into (0 through 15)
-const int servoPort = 0; 
+const int servoPort = 15; 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  delay(250);
   Serial.println("16-Channel Servo Shield Test");
 
   pwm.begin();
@@ -29,18 +30,28 @@ void setServoAngle(uint8_t channel, int angle) {
 
 void loop() {
   // Sweep from 0 to 180 degrees
-  for (int angle = 0; angle <= 180; angle += 1) {
-    setServoAngle(servoPort, angle);
-    delay(15); 
-  }
+  //for (int angle = 0; angle <= 180; angle += 1) {
+  //  setServoAngle(servoPort, angle);
+  //  delay(15);
+  //}
   
-  delay(500);
+  //delay(500);
 
   // Sweep from 180 to 0 degrees
-  for (int angle = 180; angle >= 0; angle -= 1) {
-    setServoAngle(servoPort, angle);
-    delay(15);
+  //for (int angle = 180; angle >= 0; angle -= 1) {
+  //  setServoAngle(servoPort, angle);
+  //  delay(15);
+  //}
+
+  for (int rattle = 0; rattle <= 4; rattle += 1) {
+    int rattle_delay = 200;
+
+    setServoAngle(servoPort, 70);
+    delay(rattle_delay);
+    setServoAngle(servoPort, 110);
+    delay(rattle_delay);
+    Serial.println(String(rattle));
   }
-  
+
   delay(500);
 }
