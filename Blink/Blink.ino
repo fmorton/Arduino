@@ -22,6 +22,9 @@
   https://docs.arduino.cc/built-in-examples/basics/Blink/
 */
 
+//const int led_pin = LED_BUILTIN;
+const int led_pin = 4;
+
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
@@ -29,14 +32,14 @@ void setup() {
 
   Serial.println("Setup.");
 
- pinMode(LED_BUILTIN, OUTPUT);
+ pinMode(led_pin, OUTPUT);
 }
 
 // the loop function runs over and over again forever
 void loop() {
   Serial.println("Loop.");
-  digitalWrite(LED_BUILTIN, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
+  digitalWrite(led_pin, HIGH);      // change state of the LED by setting the pin to the HIGH voltage level
   delay(1000);                      // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+  digitalWrite(led_pin, LOW);       // change state of the LED by setting the pin to the LOW voltage level
   delay(1000);                      // wait for a second
 }
