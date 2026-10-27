@@ -9,7 +9,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  600  // Maximum pulse length count (out of 4096) for 180 degrees
 
 // Specify the port your servo is plugged into (0 through 15)
-const int servoPort = 15; 
+const int servoPort = 1; 
 
 void setup() {
   Serial.begin(115200);
@@ -44,7 +44,7 @@ void loop() {
   //}
 
   for (int rattle = 0; rattle <= 4; rattle += 1) {
-    int rattle_delay = 200;
+    int rattle_delay = 1000;
 
     setServoAngle(servoPort, 70);
     delay(rattle_delay);
